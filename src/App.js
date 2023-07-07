@@ -1,11 +1,18 @@
-import React from "react";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import HomePage from './Homepge';
+import OrderForm from './OrderForm';
+import './App.css'; // Import the app.css file
 
 const App = () => {
   return (
-    <>
-      <h1>Lambda Eats</h1>
-      <p>You can remove this code and create your own header</p>
-    </>
+    <div className="app">
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/order" element={<OrderForm />} />
+      </Routes>
+    </div>
   );
 };
+
 export default App;
