@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 
-const HomePage = () => {
+const HomePge = () => {
   return (
     <div>
     <h1>Welcome to the Homepage</h1>
@@ -12,4 +12,4 @@ const HomePage = () => {
   );
 }
 
-export default HomePage;
+export default HomePge;

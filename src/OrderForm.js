@@ -1,16 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import validationSchema from './Schema';
 
 
 const OrderForm = () => {
-  const [name, setName] = useState('');
+  const [nameInput, setName] = useState('');
   const [size, setSize] = useState('');
   const [toppings, setToppings] = useState([]);
   const [specialInstructions, setSpecialInstructions] = useState('');
 
   const [errorMessage, setErrorMessage] = useState('');
 
+//   useEffect(() => {
+//     if (nameInput.length > 0 && nameInput.length < 2) {
+//       setErrorMessage('name must be at least 2 characters');
+//     } else {
+//       setErrorMessage('');
+//     }
+//   }, [nameInput]);
+
+
+
   const handleNameChange = (event) => {
-    setName(event.target.value);
+    if(validationSchema){
+        setName(event.target.value);
+    }
+
   };
 
   const handleSizeChange = (event) => {
@@ -31,37 +45,34 @@ const OrderForm = () => {
     setSpecialInstructions(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Validate the form fields here before submitting
-    if (name.length < 2) {
-      setErrorMessage('name must be at least 2 characters');
-      return;
-    }
+    // if (nameInput.length < 2) {
+    //   setErrorMessage('name must be at least 2 characters');
+    // }
 
-    // Submit the form or perform other actions
-    // ...
-
-    // Reset the form fields
     setName('');
     setSize('');
     setToppings([]);
     setSpecialInstructions('');
   };
 
+
+
   return (
     <div>
       <h2>Order Pizza</h2>
       <form id="pizza-form" onSubmit={handleSubmit}>
         <label htmlFor="name-input">Name:</label>
+        <p>{errorMessage}</p>
         <input
           type="text"
           id="name-input"
-          value={name}
+          value={nameInput}
           onChange={handleNameChange}
-        />
-
+          />
         <label htmlFor="size-dropdown">Pizza Size:</label>
         <select
           id="size-dropdown"
@@ -129,7 +140,7 @@ const OrderForm = () => {
         />
 
         {errorMessage && (
-          <div className="error-message">{errorMessage}</div>
+          <div>{errorMessage}</div>
         )}
 
         <button type="submit" id="order-button">Add to Order</button>
