@@ -1,83 +1,81 @@
 import React, { useState, useEffect } from 'react';
-import validationSchema from './Schema';
+import { validationSchema } from './Schema';
+import axios from 'axios';
 
+const initialForm = {
+  name: '',
+  size: '',
+  toppings: [],
+  pepperoni: false,
+  mushrooms: false,
+  olives: false,
+  onions: false,
+  special: ''
+};
 
 const OrderForm = () => {
-  const [nameInput, setName] = useState('');
-  const [size, setSize] = useState('');
-  const [toppings, setToppings] = useState([]);
-  const [specialInstructions, setSpecialInstructions] = useState('');
-
+  const [form, setForm] = useState(initialForm);
+  const [disabled, setDisabled] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
-//   useEffect(() => {
-//     if (nameInput.length > 0 && nameInput.length < 2) {
-//       setErrorMessage('name must be at least 2 characters');
-//     } else {
-//       setErrorMessage('');
-//     }
-//   }, [nameInput]);
+  useEffect(() => {
+    validationSchema.isValid(form).then(valid => setDisabled(!valid));
+  }, [form]);
 
+  const handleChange = evt => {
+    const { name, value, checked, type } = evt.target;
+    const newVal = type === 'checkbox' ? checked : value;
 
-
-  const handleNameChange = (event) => {
-    if(validationSchema){
-        setName(event.target.value);
-    }
-
-  };
-
-  const handleSizeChange = (event) => {
-    setSize(event.target.value);
-  };
-
-  const handleToppingChange = (event) => {
-    const { value, checked } = event.target;
-
-    if (checked) {
-      setToppings([...toppings, value]);
+    if (type === 'checkbox') {
+      if (checked) {
+        setForm(prevForm => ({ ...prevForm, toppings: [...prevForm.toppings, value] }));
+      } else {
+        setForm(prevForm => ({ ...prevForm, toppings: prevForm.toppings.filter(t => t !== value) }));
+      }
     } else {
-      setToppings(toppings.filter((topping) => topping !== value));
+      setForm({ ...form, [name]: newVal });
     }
-  };
-
-  const handleSpecialInstructionsChange = (event) => {
-    setSpecialInstructions(event.target.value);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Validate the form fields here before submitting
-    // if (nameInput.length < 2) {
-    //   setErrorMessage('name must be at least 2 characters');
-    // }
+    if (form.name.length < 2) {
+      setErrorMessage({ ...errorMessage, name: 'name must be at least 2 characters' });
+      return;
+    } else {
+      setErrorMessage({ ...errorMessage, name: '' });
+    }
 
-    setName('');
-    setSize('');
-    setToppings([]);
-    setSpecialInstructions('');
+    try {
+      const response = await axios.post('https://reqres.in/api/orders', form);
+      console.log(response.data);
+      setForm(initialForm);
+    } catch (error) {
+      console.log(error);
+    }
   };
-
-
 
   return (
     <div>
       <h2>Order Pizza</h2>
       <form id="pizza-form" onSubmit={handleSubmit}>
         <label htmlFor="name-input">Name:</label>
-        <p>{errorMessage}</p>
+        <p>{errorMessage.name}</p>
         <input
+          placeholder='Enter Name'
+          name='name'
           type="text"
           id="name-input"
-          value={nameInput}
-          onChange={handleNameChange}
-          />
+          value={form.name}
+          onChange={handleChange}
+        />
         <label htmlFor="size-dropdown">Pizza Size:</label>
         <select
+          name='size'
           id="size-dropdown"
-          value={size}
-          onChange={handleSizeChange}
+          value={form.size}
+          onChange={handleChange}
         >
           <option value="">-- Select Size --</option>
           <option value="small">Small</option>
@@ -91,8 +89,8 @@ const OrderForm = () => {
             <input
               type="checkbox"
               value="pepperoni"
-              checked={toppings.includes('pepperoni')}
-              onChange={handleToppingChange}
+              checked={form.toppings.includes('pepperoni')}
+              onChange={handleChange}
             />
             Pepperoni
           </label>
@@ -102,8 +100,8 @@ const OrderForm = () => {
             <input
               type="checkbox"
               value="mushrooms"
-              checked={toppings.includes('mushrooms')}
-              onChange={handleToppingChange}
+              checked={form.toppings.includes('mushrooms')}
+              onChange={handleChange}
             />
             Mushrooms
           </label>
@@ -113,8 +111,8 @@ const OrderForm = () => {
             <input
               type="checkbox"
               value="onions"
-              checked={toppings.includes('onions')}
-              onChange={handleToppingChange}
+              checked={form.toppings.includes('onions')}
+              onChange={handleChange}
             />
             Onions
           </label>
@@ -124,8 +122,8 @@ const OrderForm = () => {
             <input
               type="checkbox"
               value="olives"
-              checked={toppings.includes('olives')}
-              onChange={handleToppingChange}
+              checked={form.toppings.includes('olives')}
+              onChange={handleChange}
             />
             Olives
           </label>
@@ -133,20 +131,19 @@ const OrderForm = () => {
 
         <label htmlFor="special-text">Special Instructions:</label>
         <input
+          name='special'
           type="text"
           id="special-text"
-          value={specialInstructions}
-          onChange={handleSpecialInstructionsChange}
+          value={form.special}
+          onChange={handleChange}
         />
 
-        {errorMessage && (
-          <div>{errorMessage}</div>
-        )}
+        {errorMessage.name && <div className="error-message">{errorMessage.name}</div>}
 
-        <button type="submit" id="order-button">Add to Order</button>
+        <button type="submit" id="order-button" disabled={disabled}>Add to Order</button>
       </form>
     </div>
   );
-}
+};
 
 export default OrderForm;
